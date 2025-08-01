@@ -4,12 +4,7 @@ import cors from "cors"
 
 const app = express()
 
-const allowedOrigin = ["http://localhost:5173", "https://reg-log-app-frontend.vercel.app/"]
-
-app.use(cors({
-    origin: allowedOrigin,
-    credentials: true,
-}))
+app.use(cors())
 
 app.use(express.json())
 
