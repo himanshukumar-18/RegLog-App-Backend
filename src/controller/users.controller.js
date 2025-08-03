@@ -3,6 +3,7 @@ import ApiResponse from "../utils/apiResponse.js"
 import { User } from "../model/users.moel.js"
 import AsyncHandler from "../utils/asyncHandler.js"
 
+//register user
 const registerUser = AsyncHandler(async (req, res) => {
     //value from frontend
     const { name, email, password } = req.body;
@@ -37,5 +38,17 @@ const registerUser = AsyncHandler(async (req, res) => {
     );
 });
 
+// login user
+const loginUser = AsyncHandler(async (req, res) => {
+    // Get email and password from request body
+    const { email, password } = req.body;
+    console.log("Login attempt with :", email, password);
 
-export { registerUser }
+    return res.status(200).json(
+        new ApiResponse(200, null, "Login functionality is not implemented yet.")
+    )
+
+});
+
+
+export { registerUser, loginUser }
