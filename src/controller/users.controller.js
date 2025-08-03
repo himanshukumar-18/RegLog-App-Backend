@@ -2,6 +2,9 @@ import ApiError from "../utils/apiError.js"
 import ApiResponse from "../utils/apiResponse.js"
 import { User } from "../model/users.moel.js"
 import AsyncHandler from "../utils/asyncHandler.js"
+import bcrypt from "bcrypt"
+import jwt from "jsonwebtoken"
+
 
 //register user
 const registerUser = AsyncHandler(async (req, res) => {
@@ -40,15 +43,45 @@ const registerUser = AsyncHandler(async (req, res) => {
 
 // login user
 const loginUser = AsyncHandler(async (req, res) => {
-    // Get email and password from request body
     const { email, password } = req.body;
-    console.log("Login attempt with :", email, password);
 
+    // Validate input
+    if (!email || !password) {
+        throw new ApiError(400, "Email and password are required.");
+    }
+
+    // Check if user exists
+    const user = await User.findOne({ email }).select("+password");
+    if (!user) {
+        throw new ApiError(401, "User not found with this email.");
+    }
+
+    // Compare password
+    const matchPassword = await bcrypt.compare(password, user.password);
+    if (!matchPassword) {
+        throw new ApiError(401, "Invalid password.");
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+        { id: user._id },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: process.env.ACCESS_TOKEN_EXPIRY || "1h" }
+    );
+
+    // Respond
     return res.status(200).json(
-        new ApiResponse(200, null, "Login functionality is not implemented yet.")
-    )
-
+        new ApiResponse(200, {
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email
+            },
+            token
+        }, "User logged in successfully.")
+    );
 });
+
 
 
 export { registerUser, loginUser }
